@@ -64,23 +64,28 @@ public class Client implements ActivityResultListener {
 		}
 	}
 
-	private void handleSignIn(Task<GoogleSignInAccount> task) {
-		try {
-			GoogleSignInAccount account = task.getResult(ApiException.class);
-			if (account != null) {
-				String displayName;
-				if (account.getDisplayName() != null) {
-					displayName = account.getDisplayName();
-				} else {
-					displayName = "";
+	private void handleSignIn(final Task<GoogleSignInAccount> task) {
+		AppActivity.getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					GoogleSignInAccount account = task.getResult(ApiException.class);
+					if (account != null) {
+						String displayName;
+						if (account.getDisplayName() != null) {
+							displayName = account.getDisplayName();
+						} else {
+							displayName = "";
+						}
+						onSignInSuccess(displayName, account.getEmail(), account.getIdToken());
+					} else {
+						onSignInFailed();
+					}
+				} catch (ApiException e) {
+					e.printStackTrace();
+					onSignInFailed();
 				}
-				onSignInSuccess(displayName, account.getEmail(), account.getIdToken());
-			} else {
-				onSignInFailed();
 			}
-		} catch (ApiException e) {
-			e.printStackTrace();
-			onSignInFailed();
-		}
+		});
 	}
 }
